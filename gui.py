@@ -40,7 +40,7 @@ class Button(tk.Label):
 		self.configure(anchor="center")
 		self.configure(background=self.background)
 		self.configure(highlightthickness=1)
-		if not "font" in kw.keys():
+		if "font" not in kw:
 			self.configure(font=style.BUTTON_FONT)
 		self.configure(highlightbackground="#999999")
 		self.bind('<Button-1>', self.on_click)
@@ -219,7 +219,7 @@ def _create_container(func):
 
 def _bound_to_mousewheel(event, widget):
 	child = widget.winfo_children()[0]
-	if platform.system() == 'Windows' or platform.system() == 'Darwin':
+	if platform.system() in ['Windows', 'Darwin']:
 		child.bind_all('<MouseWheel>', lambda e: _on_mousewheel(e, child))
 		child.bind_all('<Shift-MouseWheel>',
 					   lambda e: _on_shiftmouse(e, child))
@@ -231,7 +231,7 @@ def _bound_to_mousewheel(event, widget):
 
 
 def _unbound_to_mousewheel(event, widget):
-	if platform.system() == 'Windows' or platform.system() == 'Darwin':
+	if platform.system() in ['Windows', 'Darwin']:
 		widget.unbind_all('<MouseWheel>')
 		widget.unbind_all('<Shift-MouseWheel>')
 	else:
@@ -246,11 +246,10 @@ def _on_mousewheel(event, widget):
 		widget.yview_scroll(-1 * int(event.delta / 120), 'units')
 	elif platform.system() == 'Darwin':
 		widget.yview_scroll(-1 * int(event.delta), 'units')
-	else:
-		if event.num == 4:
-			widget.yview_scroll(-1, 'units')
-		elif event.num == 5:
-			widget.yview_scroll(1, 'units')
+	elif event.num == 4:
+		widget.yview_scroll(-1, 'units')
+	elif event.num == 5:
+		widget.yview_scroll(1, 'units')
 
 
 class ScrolledText(AutoScroll, tk.Text):
@@ -465,21 +464,21 @@ class gui(tk.Tk):
 		self.console.see('end')
 
 	def add(self):
-		to_add = tkfiledialog.askopenfilename(filetypes=[('wad file', '*.wad')])
-		if to_add:
+		if to_add := tkfiledialog.askopenfilename(filetypes=[('wad file', '*.wad')]):
 			self.path_box.insert('end', to_add)
 
 	def add_folder(self):
-		dir_to_add = tkfiledialog.askdirectory()
-		if dir_to_add:
-			to_add = [f for f in os.listdir(dir_to_add) if (os.path.isfile(os.path.join(dir_to_add, f)) and f.endswith(".wad"))]
-			if to_add:
+		if dir_to_add := tkfiledialog.askdirectory():
+			if to_add := [
+				f
+				for f in os.listdir(dir_to_add)
+				if (os.path.isfile(os.path.join(dir_to_add, f)) and f.endswith(".wad"))
+			]:
 				for f in to_add:
 					self.path_box.insert('end', os.path.join(dir_to_add, f))
 
 	def remove(self):
-		index = self.path_box.curselection()
-		if index:
+		if index := self.path_box.curselection():
 			self.path_box.delete(index)
 			if self.path_box.size():
 				self.path_box.select_clear(0, 'end')
